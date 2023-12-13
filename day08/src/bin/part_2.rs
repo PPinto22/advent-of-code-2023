@@ -18,17 +18,15 @@ struct NodePair {
     right: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct NetworkState {
     node: String,
     step: usize,
 }
 
-// FIXME Takes too long
 fn solve(input: &str) -> u64 {
-    let mut network = Network::parse(input);
-    network.step_until_end();
-    return network.states[0].step as u64;
+    let network = Network::parse(input);
+    return network.count_steps_until_end();
 }
 
 impl Network {
@@ -75,25 +73,29 @@ impl Network {
         return Network::new(instructions, connections);
     }
 
-    fn step(&mut self) {
-        self.states = self
+    fn count_steps_until_end(&self) -> u64 {
+        let final_states = self
             .states
             .iter()
-            .map(|state| {
-                let instruction = self.instructions[state.step % self.instructions.len()];
-                let next_node = self.connections[&state.node].get(instruction).to_owned();
-                return NetworkState {
-                    node: next_node,
-                    step: state.step + 1,
-                };
-            })
-            .collect();
+            .map(|state| self.step_state_until_end(state));
+        return final_states
+            .map(|state| state.step as u64)
+            .reduce(|acc, steps| num::integer::lcm(acc, steps))
+            .unwrap();
     }
 
-    fn step_until_end(&mut self) {
-        while self.states.iter().any(|state| !state.node.ends_with("Z")) {
-            self.step();
+    fn step_state_until_end(&self, state: &NetworkState) -> NetworkState {
+        let mut state = state.clone();
+        while !state.node.ends_with("Z") {
+            let instruction = self.instructions[state.step % self.instructions.len()];
+            let next_node = self.connections[&state.node].get(instruction).to_owned();
+
+            state = NetworkState {
+                node: next_node,
+                step: state.step + 1,
+            }
         }
+        return state.clone();
     }
 }
 
