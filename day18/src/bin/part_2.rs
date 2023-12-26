@@ -1,7 +1,4 @@
-use std::{
-    cmp::{max, min},
-    str::FromStr,
-};
+use std::str::FromStr;
 
 fn main() {
     let input = include_str!("../../input.txt");
@@ -10,14 +7,6 @@ fn main() {
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 struct Point(i128, i128);
-
-#[derive(Debug)]
-struct Square {
-    left: i128,
-    right: i128,
-    top: i128,
-    bottom: i128,
-}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Instruction {
@@ -45,9 +34,7 @@ fn solve(input: &str) -> u128 {
 
 impl Polygon {
     fn from_instructions(instructions: &Vec<Instruction>) -> Self {
-        let square = Polygon::calculate_square_boundary(instructions);
-
-        let mut position = Point(square.top.abs(), square.left.abs());
+        let mut position = Point(0, 0);
         let mut vertices = vec![position.clone()];
 
         for instruction in instructions {
@@ -76,44 +63,6 @@ impl Polygon {
         });
 
         double_area / 2 + 1
-    }
-
-    fn calculate_square_boundary(instructions: &Vec<Instruction>) -> Square {
-        let mut left = i128::MAX;
-        let mut right = i128::MIN;
-        let mut top = i128::MAX;
-        let mut bottom = i128::MIN;
-
-        let mut cur_width: i128 = 0;
-        let mut cur_height: i128 = 0;
-
-        for instruction in instructions {
-            match instruction.direction {
-                Direction::R => {
-                    cur_width += instruction.meters as i128;
-                    right = max(right, cur_width);
-                }
-                Direction::L => {
-                    cur_width -= instruction.meters as i128;
-                    left = min(left, cur_width);
-                }
-                Direction::D => {
-                    cur_height += instruction.meters as i128;
-                    bottom = max(bottom, cur_height);
-                }
-                Direction::U => {
-                    cur_height -= instruction.meters as i128;
-                    top = min(top, cur_height);
-                }
-            }
-        }
-
-        Square {
-            left,
-            right,
-            top,
-            bottom,
-        }
     }
 
     fn next_position(position: &Point, instruction: &Instruction) -> Point {

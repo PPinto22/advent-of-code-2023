@@ -1,7 +1,4 @@
-use std::{
-    cmp::{max, min},
-    str::FromStr,
-};
+use std::str::FromStr;
 
 fn main() {
     let input = include_str!("../../input.txt");
@@ -9,15 +6,7 @@ fn main() {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
-struct Point(usize, usize);
-
-#[derive(Debug)]
-struct Square {
-    left: i32,
-    right: i32,
-    top: i32,
-    bottom: i32,
-}
+struct Point(isize, isize);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct Instruction {
@@ -45,9 +34,7 @@ fn solve(input: &str) -> u32 {
 
 impl Polygon {
     fn from_instructions(instructions: &Vec<Instruction>) -> Self {
-        let square = Polygon::calculate_square_boundary(instructions);
-
-        let mut position = Point(square.top.abs() as usize, square.left.abs() as usize);
+        let mut position = Point(0, 0);
         let mut vertices = vec![position.clone()];
 
         for instruction in instructions {
@@ -78,52 +65,14 @@ impl Polygon {
         double_area / 2 + 1
     }
 
-    fn calculate_square_boundary(instructions: &Vec<Instruction>) -> Square {
-        let mut left = i32::MAX;
-        let mut right = i32::MIN;
-        let mut top = i32::MAX;
-        let mut bottom = i32::MIN;
-
-        let mut cur_width: i32 = 0;
-        let mut cur_height: i32 = 0;
-
-        for instruction in instructions {
-            match instruction.direction {
-                Direction::R => {
-                    cur_width += instruction.meters as i32;
-                    right = max(right, cur_width);
-                }
-                Direction::L => {
-                    cur_width -= instruction.meters as i32;
-                    left = min(left, cur_width);
-                }
-                Direction::D => {
-                    cur_height += instruction.meters as i32;
-                    bottom = max(bottom, cur_height);
-                }
-                Direction::U => {
-                    cur_height -= instruction.meters as i32;
-                    top = min(top, cur_height);
-                }
-            }
-        }
-
-        Square {
-            left,
-            right,
-            top,
-            bottom,
-        }
-    }
-
     fn next_position(position: &Point, instruction: &Instruction) -> Point {
         let Point(i, j) = *position;
 
         match instruction.direction {
-            Direction::R => Point(i, j + instruction.meters as usize),
-            Direction::D => Point(i + instruction.meters as usize, j),
-            Direction::L => Point(i, j - instruction.meters as usize),
-            Direction::U => Point(i - instruction.meters as usize, j),
+            Direction::R => Point(i, j + instruction.meters as isize),
+            Direction::D => Point(i + instruction.meters as isize, j),
+            Direction::L => Point(i, j - instruction.meters as isize),
+            Direction::U => Point(i - instruction.meters as isize, j),
         }
     }
 }
